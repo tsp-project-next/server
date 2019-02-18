@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="server.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-02-16T00:37:42" hostname="rover-221-100.rovernet.mtu.edu" time="0.001">
+<testsuite name="server.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-02-18T01:09:30" hostname="DESKTOP-BU3HJ01" time="0.001">
   <properties/>
   <testcase name="test" classname="server.ServerTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
