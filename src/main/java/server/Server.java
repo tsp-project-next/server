@@ -1,5 +1,8 @@
 package server;
 
+import client.Packet;
+
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -62,12 +65,14 @@ public class Server {
                 //Create input stream from socket
                 inputFromClient = new ObjectInputStream(socket.getInputStream());
 
+                Packet packet = new Packet("This is a test", "host");
+
                 while(true){
                     //Read from input
                     Object obj = inputFromClient.readObject();
 
                     //return information to client.
-                    outputToClient.writeObject(obj);
+                    outputToClient.writeObject(packet);
                     System.out.println("Sending information back to client...");
                 }
             } catch(ClassNotFoundException ex) {
@@ -75,6 +80,8 @@ public class Server {
             } catch(SocketException ex) {
                 System.out.println("Connection reset/closed for client: " + socket.getInetAddress().getHostName());
                 return;
+            } catch(EOFException ex) {
+                // System.out.println("We're catching this in the final block....");
             } catch(IOException ex) {
                 ex.printStackTrace();
             }

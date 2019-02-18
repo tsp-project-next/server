@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="server.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-02-18T01:09:30" hostname="DESKTOP-BU3HJ01" time="0.001">
+<testsuite name="server.ServerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-02-18T18:38:28" hostname="rover-221-100.rovernet.mtu.edu" time="0.002">
   <properties/>
-  <testcase name="test" classname="server.ServerTest" time="0.001"/>
+  <testcase name="test" classname="server.ServerTest" time="0.002"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

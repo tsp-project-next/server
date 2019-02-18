@@ -4,14 +4,11 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
 
-    // This class must be under the "client" package.
-    // Its specification must match the clients exact same packet classpath
-    // or you will get a ClassNotFoundException
+    private String data, clientIdentifier;
 
-    private String data;
-
-    public Packet(String data) {
+    public Packet(String data, String cId) {
         this.data = data;
+        this.clientIdentifier = cId;
     }
 
     public String getData() {
