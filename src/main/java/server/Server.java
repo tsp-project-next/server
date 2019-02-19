@@ -1,7 +1,5 @@
 package server;
 
-import client.Packet;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -65,15 +63,13 @@ public class Server {
                 //Create input stream from socket
                 inputFromClient = new ObjectInputStream(socket.getInputStream());
 
-                Packet packet = new Packet("This is a test", "host");
-
                 while(true){
                     //Read from input
                     Object obj = inputFromClient.readObject();
 
                     //return information to client.
-                    outputToClient.writeObject(packet);
-                    System.out.println("Sending information back to client...");
+                    outputToClient.writeObject(obj);
+                    System.out.println("information sent back to client...");
                 }
             } catch(ClassNotFoundException ex) {
                 ex.printStackTrace();

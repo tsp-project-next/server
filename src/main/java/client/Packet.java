@@ -15,4 +15,8 @@ public class Packet implements Serializable {
         return data;
     }
 
+    public String getClientIdentifier() {
+        return clientIdentifier;
+    }
+
 }
