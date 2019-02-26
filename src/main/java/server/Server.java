@@ -9,6 +9,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import client.Packet;
+
 public class Server {
 
     private int clientNumber = 0;
@@ -40,6 +42,16 @@ public class Server {
         }
     }
 
+    //Use this method to switch through and handle different received packets
+    public void handleReceivedPacket(Packet packet, ObjectOutputStream outputToClient) {
+        try {
+            outputToClient.writeObject(packet);
+            System.out.println("information sent back to client...");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     class HandleClient implements Runnable {
 
         private ObjectInputStream inputFromClient;
@@ -65,11 +77,9 @@ public class Server {
 
                 while(true){
                     //Read from input
-                    Object obj = inputFromClient.readObject();
+                    Packet packetReceived = (Packet) inputFromClient.readObject();
 
-                    //return information to client.
-                    outputToClient.writeObject(obj);
-                    System.out.println("information sent back to client...");
+                    handleReceivedPacket(packetReceived, outputToClient);
                 }
             } catch(ClassNotFoundException ex) {
                 ex.printStackTrace();
