@@ -8,12 +8,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import client.Packet;
 
 public class Server {
 
     private int clientNumber = 0;
+    private ConcurrentHashMap<Integer,HandleClient> clientMap = new ConcurrentHashMap<>();
 
     public static void main(String args[]) {
         new Server();
@@ -29,13 +31,33 @@ public class Server {
                 //Listen for new connection request
                 Socket socket = serverSocket.accept();
 
-                //increment client number
-                clientNumber++;
-
                 InetAddress address = socket.getInetAddress();
                 System.out.println("Client " + clientNumber + " connected with host name " + address.getHostName());
 
-                new Thread(new HandleClient(socket)).start();
+                HandleClient handleClient;
+                new Thread(handleClient = new HandleClient(socket, clientNumber)).start();
+
+                //add the socket to the client map
+                clientMap.put(clientNumber, handleClient);
+
+                //increment client number
+                clientNumber++;
+            }
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    //might need to throw the actual object writing on a separate thread.
+    //might not need to if the class instance itself is run on a separate thread.
+    public void sendPacketToAllClients(String data, String cid) {
+        try {
+            //Create a packet to send
+            Packet packet = new Packet(data, cid);
+            for (int clientNumber : clientMap.keySet()){
+                //send packet to every currently registered client
+                clientMap.get(clientNumber).outputToClient.writeObject(packet);
+                System.out.println("Object sent to client number: " + clientNumber);
             }
         } catch(IOException ex) {
             ex.printStackTrace();
@@ -56,12 +78,14 @@ public class Server {
 
         private ObjectInputStream inputFromClient;
         private ObjectOutputStream outputToClient;
+        private int clientNumber;
 
         //The connected socket
         private Socket socket;
 
-        public HandleClient(Socket socket) {
+        public HandleClient(Socket socket, int clientNumber) {
             this.socket = socket;
+            this.clientNumber = clientNumber;
         }
 
         @Override
@@ -90,6 +114,8 @@ public class Server {
                 // System.out.println("We're catching this in the final block....");
             } catch(IOException ex) {
                 ex.printStackTrace();
+            } finally {
+                clientMap.remove(clientNumber);
             }
         }
     }
