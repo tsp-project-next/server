@@ -14,6 +14,8 @@ import client.Packet;
 
 public class Server {
 
+    private ServerSocket serverSocket;
+
     private int clientNumber = 0;
     private ConcurrentHashMap<Integer,HandleClient> clientMap = new ConcurrentHashMap<>();
 
@@ -24,7 +26,7 @@ public class Server {
     public Server() {
         try {
             //Create server socket
-            ServerSocket serverSocket = new ServerSocket(9000);
+            serverSocket = new ServerSocket(9000);
             System.out.println("Server started...");
 
             while(true) {
