@@ -15,6 +15,7 @@ import client.Packet;
 public class Server {
 
     private ServerSocket serverSocket;
+    private Database database;
 
     private int clientNumber = 0;
     private ConcurrentHashMap<Integer,HandleClient> clientMap = new ConcurrentHashMap<>();
@@ -28,6 +29,9 @@ public class Server {
             //Create server socket
             serverSocket = new ServerSocket(9000);
             System.out.println("Server started...");
+
+            database = new Database();
+            database.connectDB();
 
             while(true) {
                 //Listen for new connection request

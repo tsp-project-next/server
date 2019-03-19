@@ -5,12 +5,13 @@ import java.sql.*;
 public class Database {
 
     Connection conn = null;
-    String username = null;
-    String password = null;
+    String username = "next";
+    String password = "projectnext";
 
     public boolean connectDB(){
-        try{
-            conn = DriverManager.getConnection("path",username,password);
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/",username,password);
+            System.out.println("Database Connected...");
         } catch (SQLException e){
             System.out.println(e.getMessage());
             e.printStackTrace();
