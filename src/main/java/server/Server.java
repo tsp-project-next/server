@@ -26,12 +26,17 @@ public class Server {
 
     public Server() {
         try {
+            database = new Database();
+            boolean connected = database.connectDB();
+            if(connected == false) {
+                System.out.println("Failed to connect to database.");
+                System.out.println("Server stopping...");
+                System.exit(0);
+            }
+
             //Create server socket
             serverSocket = new ServerSocket(9000);
             System.out.println("Server started...");
-
-            database = new Database();
-            database.connectDB();
 
             while(true) {
                 //Listen for new connection request
