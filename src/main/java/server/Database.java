@@ -43,8 +43,8 @@ public class Database {
         ResultSet rs = null;
         int rowcount;
         String query = "{ call addLobby(?, ?) }";
-        try (conn = connectDB(); 
-            stmt = conn.prepareCall(query)) {
+        try {
+            stmt = conn.prepareCall(query);
             stmt.setString(1, code);
             stmt.setString(2, uri);
             rs = stmt.executeQuery();
@@ -61,14 +61,14 @@ public class Database {
      * Parameters: code (the lobby code)
      * Return: 0 (if failed), 1 (if completed)
      */
-    public int removeLobby(String code) {
+    public boolean removeLobby(String code) {
         CallableStatement stmt = null;
         Connection conn = null;
         ResultSet rs = null;
         int rowcount;
         String query = "{ call removeLobby(?) }";
-        try (conn = connectDB(); 
-            stmt = conn.prepareCall(query)) {
+        try {
+            stmt = conn.prepareCall(query);
             stmt.setString(1, code);
             rs = stmt.executeQuery();
         } catch (SQLException e) {
