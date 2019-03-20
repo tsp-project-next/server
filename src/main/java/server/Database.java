@@ -1,5 +1,7 @@
 package server;
 
+import com.mysql.cj.ServerPreparedQueryTestcaseGenerator;
+
 import java.io.Console;
 import java.sql.*;
 import java.util.Scanner;
@@ -73,15 +75,14 @@ public class Database {
 
     /**
      * addLobby
-     * calls the addLobby procedure from the database
-     * Parameters: code (the lobby code), uri (the playlist uri)
-     * Return: 0 (if failed), 1 (if completed)
+     * calls the add lobby procedure from the database
+     * @param code the lobby code
+     * @param uri the playlist uri
+     * @return true if succesful, else false
      */
     public boolean addLobby(String code, String uri) {
         CallableStatement stmt = null;
-        Connection conn = null;
         ResultSet rs = null;
-        int rowcount;
         String query = "{ call addLobby(?, ?) }";
         try {
             stmt = conn.prepareCall(query);
@@ -94,18 +95,16 @@ public class Database {
         }
         return true;
     }
-    
+
     /**
      * removeLobby
-     * calls the removeLobby procedure from the database
-     * Parameters: code (the lobby code)
-     * Return: 0 (if failed), 1 (if completed)
+     * calls the remove lobby procedure from the database
+     * @param code the lobby code
+     * @return true if succesful, else false
      */
     public boolean removeLobby(String code) {
         CallableStatement stmt = null;
-        Connection conn = null;
         ResultSet rs = null;
-        int rowcount;
         String query = "{ call removeLobby(?) }";
         try {
             stmt = conn.prepareCall(query);
@@ -116,5 +115,112 @@ public class Database {
             return false;
         }
         return true;
+    }
+
+    /**
+     * addUser
+     * calls the addUser procedure from the database
+     * @param user_id the user id
+     * @param code the lobby code
+     * @param is_host user host status
+     * @return true if successful, else false
+     */
+    public boolean addUser(String user_id, String code, boolean is_host) {
+        CallableStatement stmt = null;
+        String query = "{ call addUser(?, ?, ?) }";
+        return userHelp(stmt, query, user_id, code, is_host);
+    }
+
+    /**
+     * removeUser
+     * calls the removeUser procedure from the database
+     * @param user_id the user id
+     * @param code the lobby code
+     * @param is_host user host status
+     * @return true if successful, else false
+     */
+    public boolean removeUser(String user_id, String code, boolean is_host) {
+        CallableStatement stmt = null;
+        String query = "{ call removeUser(?, ?, ?) }";
+        return userHelp(stmt, query, user_id, code, is_host);
+    }
+
+    /**
+     * userHelp
+     * deals with the statements prepared by remove and addUser
+     * @param stmt the sql statement
+     * @param query the query to be executed
+     * @param user_id user id
+     * @param code lobby code
+     * @param is_host user host status
+     * @return true if successful, else false
+     */
+    private boolean userHelp(CallableStatement stmt, String query, String user_id, String code, boolean is_host) {
+        ResultSet rs;
+        try {
+            stmt = conn.prepareCall(query);
+            stmt.setString(1, user_id);
+            stmt.setString(2, code);
+            if (is_host)
+                stmt.setInt(3, 1);
+            else
+                stmt.setInt(3, 0);
+            rs = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * getLobbySize
+     * returns the size of a lobby
+     * @param code the lobby code
+     * @return the size of the lobby
+     */
+    public int getLobbySize(String code) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String query = "select currentsize from lobby where code = ?";
+        int ret;
+        try {
+            conn.setAutoCommit(false);
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, code);
+            rs = stmt.executeQuery();
+            conn.commit();
+            ret = rs.getInt("currensize");
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return ret;
+    }
+
+    /**
+     * getURI
+     * retrieves the playlist uri of a lobby
+     * @param code the lobby code
+     * @return the playlist uri
+     */
+    public String getURI(String code) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String query = "select playlist_uri from lobby where code = ?";
+        String ret;
+        try {
+            conn.setAutoCommit(false);
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, code);
+            rs = stmt.executeQuery();
+            conn.commit();
+            ret = rs.getString("playlist_uri");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return ret;
     }
 }
