@@ -1,16 +1,31 @@
 package server;
 
 import java.sql.*;
+import java.util.Scanner;
 
 public class Database {
 
     Connection conn = null;
-    String username = "next";
-    String password = "projectnext";
+    String username;
+    String password;
 
     public boolean connectDB(){
+        try{
+            Scanner scanner = new Scanner(System.in);
+            if(scanner == null){
+                System.out.println("Scanner is null.");
+                return false;
+            }
+            System.out.print("Please enter your username: ");
+            username = scanner.nextLine();
+            System.out.print("Please enter your password: ");
+            password = scanner.nextLine();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+
         try {
-            conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/",username,password);
+            conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/", username, password);
             System.out.println("Database Connected...");
         } catch (SQLException e){
             System.out.println(e.getMessage());
