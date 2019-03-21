@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import client.Packet;
@@ -17,8 +19,11 @@ public class Server {
     private ServerSocket serverSocket;
     private Database database;
 
+    //client number serves no purpose other than to display how many users are connected
     private int clientNumber = 0;
-    private ConcurrentHashMap<Integer,HandleClient> clientMap = new ConcurrentHashMap<>();
+    private List<String> user_ids = new ArrayList<>();
+    private List<String> lobby_ids = new ArrayList<>();
+    private ConcurrentHashMap<String,HandleClient> clientMap = new ConcurrentHashMap<>();
 
     public static void main(String args[]) {
         new Server();
@@ -45,11 +50,16 @@ public class Server {
                 InetAddress address = socket.getInetAddress();
                 System.out.println("Client " + clientNumber + " connected with host name " + address.getHostName());
 
+                String user_id;
+                do {
+                    user_id = Utilities.generateCode();
+                } while (user_ids.contains(user_id));
+
                 HandleClient handleClient;
-                new Thread(handleClient = new HandleClient(socket, clientNumber)).start();
+                new Thread(handleClient = new HandleClient(socket, user_id)).start();
 
                 //add the socket to the client map
-                clientMap.put(clientNumber, handleClient);
+                clientMap.put(user_id, handleClient);
 
                 //increment client number
                 clientNumber++;
@@ -61,14 +71,14 @@ public class Server {
 
     //might need to throw the actual object writing on a separate thread.
     //might not need to if the class instance itself is run on a separate thread.
-    public void sendPacketToAllClients(String data, String cid) {
+    public void sendPacketToAllClients(int packetID, int packetType) {
         try {
             //Create a packet to send
-            Packet packet = new Packet(data, cid);
-            for (int clientNumber : clientMap.keySet()){
+            Packet packet = new Packet(packetID, packetType);
+            for (String user_id : clientMap.keySet()){
                 //send packet to every currently registered client
-                clientMap.get(clientNumber).outputToClient.writeObject(packet);
-                System.out.println("Object sent to client number: " + clientNumber);
+                clientMap.get(user_id).outputToClient.writeObject(packet);
+                System.out.println("Object sent to user_id: " + user_id);
             }
         } catch(IOException ex) {
             ex.printStackTrace();
@@ -78,8 +88,17 @@ public class Server {
     //Use this method to switch through and handle different received packets
     public void handleReceivedPacket(Packet packet, ObjectOutputStream outputToClient) {
         try {
-            outputToClient.writeObject(packet);
-            System.out.println("information sent back to client...");
+            switch(packet.getPacketType()) {
+                case 0:
+                    Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0);
+                    outputToClient.writeObject(packet);
+                    break;
+                case 1:
+                    break;
+                default:
+                    System.out.println("Packet Type Mismatch...");
+                    break;
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -89,14 +108,14 @@ public class Server {
 
         private ObjectInputStream inputFromClient;
         private ObjectOutputStream outputToClient;
-        private int clientNumber;
+        private String user_id;
 
         //The connected socket
         private Socket socket;
 
-        public HandleClient(Socket socket, int clientNumber) {
+        public HandleClient(Socket socket, String user_id) {
             this.socket = socket;
-            this.clientNumber = clientNumber;
+            this.user_id = user_id;
         }
 
         @Override
@@ -126,7 +145,7 @@ public class Server {
             } catch(IOException ex) {
                 ex.printStackTrace();
             } finally {
-                clientMap.remove(clientNumber);
+                clientMap.remove(user_id);
             }
         }
     }
