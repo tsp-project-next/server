@@ -71,10 +71,10 @@ public class Server {
 
     //might need to throw the actual object writing on a separate thread.
     //might not need to if the class instance itself is run on a separate thread.
-    public void sendPacketToAllClients(String packetID, int packetType) {
+    public void sendPacketToAllClients(String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
         try {
             //Create a packet to send
-            Packet packet = new Packet(packetID, packetType);
+            Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
             for (String user_id : clientMap.keySet()){
                 //send packet to every currently registered client
                 clientMap.get(user_id).outputToClient.writeObject(packet);
@@ -89,10 +89,12 @@ public class Server {
     public void handleReceivedPacket(Packet packet, ObjectOutputStream outputToClient) {
         try {
             switch(packet.getPacketType()) {
+                //packet type 0 = lobby creation
                 case 0:
-                    Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0);
+                    Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, null, null, null);
                     outputToClient.writeObject(packet);
                     break;
+                //packet type 1 = lobby join
                 case 1:
                     break;
                 default:

@@ -4,25 +4,22 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
 
-    private String packetIdentifier;
+    private String packetIdentifier = null;
 
-    private int packetType;
+    private int packetType = -1;
 
-    private String playlistURI;
+    private String playlistURI = null;
 
-    private String songURI;
+    private String songURI = null;
 
-    private String lobby;
+    private String lobby  = null;
 
-    private int flag;
-
-    public Packet(String packetIdentifier, int packetType) {
+    public Packet(String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
         this.packetIdentifier = packetIdentifier;
         this.packetType = packetType;
-    }
-
-    public void setFlag(int flag) {
-        this.flag = flag;
+        this.playlistURI = playlistURI;
+        this.songURI = songURI;
+        this.lobby = lobby;
     }
 
     public void setLobby(String str) {
