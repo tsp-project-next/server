@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
 
-    private int packetIdentifier;
+    private String packetIdentifier;
 
     private int packetType;
 
@@ -16,7 +16,7 @@ public class Packet implements Serializable {
 
     private int flag;
 
-    public Packet(int packetIdentifier, int packetType) {
+    public Packet(String packetIdentifier, int packetType) {
         this.packetIdentifier = packetIdentifier;
         this.packetType = packetType;
     }
@@ -49,7 +49,7 @@ public class Packet implements Serializable {
         return playlistURI;
     }
 
-    public int getPacketIdentifier() {
+    public String getPacketIdentifier() {
         return packetIdentifier;
     }
 

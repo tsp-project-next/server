@@ -71,7 +71,7 @@ public class Server {
 
     //might need to throw the actual object writing on a separate thread.
     //might not need to if the class instance itself is run on a separate thread.
-    public void sendPacketToAllClients(int packetID, int packetType) {
+    public void sendPacketToAllClients(String packetID, int packetType) {
         try {
             //Create a packet to send
             Packet packet = new Packet(packetID, packetType);
