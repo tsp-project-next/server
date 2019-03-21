@@ -223,4 +223,62 @@ public class Database {
         }
         return ret;
     }
+
+    /**
+     * deleteTableRows
+     * deletes all rows in a table
+     * @param table the table name to have its rows deleted
+     * @return the number of rows deleted
+     */
+    public int deleteTableRows(String table) {
+        PreparedStatement stmt = null;
+        int rows;
+        String query = "delete from ?";
+        try {
+            conn.setAutoCommit(false);
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, table);
+            rows = stmt.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return rows;
+    }
+
+    /**
+     * printTableRows
+     * prints the rows of a given table
+     * @param table table to be printed
+     * @return the number of rows in the table
+     */
+    public int  printTableRows(String table) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String query = "select * from ?";
+        int rowCount = 0;
+
+        try {
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, table);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                if (table.toLowerCase().equals("lobby")) {
+                    System.out.println(rs.getString(1) + " " + rs.getString(2)
+                            + " " + rs.getInt(3) + " " + rs.getInt(4));
+                    rowCount++;
+                }
+                else if (table.toLowerCase().equals("users")) {
+                    System.out.println(rs.getString(1) + " " + rs.getString(2)
+                            + " " + rs.getInt(3));
+                    rowCount++;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return rowCount;
+    }
 }
