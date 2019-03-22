@@ -54,6 +54,7 @@ public class Server {
                 do {
                     user_id = Utilities.generateCode();
                 } while (user_ids.contains(user_id));
+                user_ids.add(user_id);
 
                 HandleClient handleClient;
                 new Thread(handleClient = new HandleClient(socket, user_id)).start();
@@ -91,7 +92,12 @@ public class Server {
             switch(packet.getPacketType()) {
                 //packet type 0 = lobby creation
                 case 0:
-                    Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, null, null, null);
+                    String lobby_id;
+                    do {
+                        lobby_id = Utilities.generateCode();
+                    } while (lobby_ids.contains(lobby_id));
+                    lobby_ids.add(lobby_id);
+                    Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, null, null, lobby_id);
                     outputToClient.writeObject(packet);
                     break;
                 //packet type 1 = lobby join
