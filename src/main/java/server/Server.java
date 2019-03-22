@@ -98,7 +98,7 @@ public class Server {
                     } while (lobby_ids.contains(lobby_id));
                     lobby_ids.add(lobby_id);
                     Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, null, null, lobby_id);
-                    outputToClient.writeObject(packet);
+                    outputToClient.writeObject(returnPacket);
                     break;
                 //packet type 1 = lobby join
                 case 1:
