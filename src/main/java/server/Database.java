@@ -14,6 +14,22 @@ public class Database {
     private boolean mask = false;
     private char[] maskedPassword = null;
 
+    public boolean connectDB(int i) {
+        try {
+            // Please type out username and password here
+            username = "";
+            password = "";
+            conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, password);
+            System.out.println("Database Connected...");
+
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     public boolean connectDB(){
         try{
             Scanner scanner = new Scanner(System.in);
@@ -71,6 +87,10 @@ public class Database {
             System.out.println("Vendor: " + e.getErrorCode());
 
         }
+    }
+
+    public Connection getConn() {
+        return conn;
     }
 
     /**
@@ -216,6 +236,7 @@ public class Database {
             stmt.setString(1, code);
             rs = stmt.executeQuery();
             conn.commit();
+            rs.next();
             ret = rs.getString("playlist_uri");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -233,11 +254,10 @@ public class Database {
     public int deleteTableRows(String table) {
         PreparedStatement stmt = null;
         int rows;
-        String query = "delete from ?";
+        String query = "delete from " + table;
         try {
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(query);
-            stmt.setString(1, table);
             rows = stmt.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
@@ -256,12 +276,11 @@ public class Database {
     public int  printTableRows(String table) {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String query = "select * from ?";
+        String query = "select * from " + table;
         int rowCount = 0;
 
         try {
             stmt = conn.prepareStatement(query);
-            stmt.setString(1, table);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 if (table.toLowerCase().equals("lobby")) {
