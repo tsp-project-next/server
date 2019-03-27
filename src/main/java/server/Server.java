@@ -21,8 +21,11 @@ public class Server {
 
     //client number serves no purpose other than to display how many users are connected
     private int clientNumber = 0;
+    //a list of all currently taken user_ids
     private List<String> user_ids = new ArrayList<>();
+    //a list of all currently taken lobby_ids
     private List<String> lobby_ids = new ArrayList<>();
+    //Hashmap<user_id,client thread/object> the clients thread is stored by their user_id
     private ConcurrentHashMap<String,HandleClient> clientMap = new ConcurrentHashMap<>();
 
     public static void main(String args[]) {
@@ -33,11 +36,17 @@ public class Server {
         try {
             database = new Database();
             boolean connected = database.connectDB();
+            //if the database is not connected then shut down the server
             if(connected == false) {
                 System.out.println("Failed to connect to database.");
                 System.out.println("Server stopping...");
                 System.exit(0);
             }
+
+            database.deleteTableRows("users");
+            System.out.println("users table data cleared");
+            database.deleteTableRows("lobby");
+            System.out.println("lobby table data cleared");
 
             //Create server socket
             serverSocket = new ServerSocket(9000);
@@ -55,6 +64,7 @@ public class Server {
                     user_id = Utilities.generateCode();
                 } while (user_ids.contains(user_id));
                 user_ids.add(user_id);
+                //database.addUser(user_id, null, false);
 
                 HandleClient handleClient;
                 new Thread(handleClient = new HandleClient(socket, user_id)).start();
@@ -70,8 +80,7 @@ public class Server {
         }
     }
 
-    //might need to throw the actual object writing on a separate thread.
-    //might not need to if the class instance itself is run on a separate thread.
+    //sends a packet to all clients currently connected to the server
     public void sendPacketToAllClients(String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
         try {
             //Create a packet to send
@@ -97,8 +106,13 @@ public class Server {
                         lobby_id = Utilities.generateCode();
                     } while (lobby_ids.contains(lobby_id));
                     lobby_ids.add(lobby_id);
-                    Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, null, null, lobby_id);
-                    outputToClient.writeObject(returnPacket);
+                    boolean lobbyCreate = database.addLobby(lobby_id, packet.getPlaylistURI());
+                    if(lobbyCreate) {
+                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, packet.getPlaylistURI(), null, lobby_id);
+                        outputToClient.writeObject(returnPacket);
+                    } else {
+                        System.out.println("Failed to create lobby with id: " + lobby_id);
+                    }
                     break;
                 //packet type 1 = lobby join
                 case 1:

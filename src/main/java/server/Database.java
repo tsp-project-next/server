@@ -64,10 +64,10 @@ public class Database {
 
         try {
             if(mask == true) {
-                conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/", username, new String(maskedPassword));
+                conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, new String(maskedPassword));
                 System.out.println("Database Connected...");
             } else {
-                conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/", username, password);
+                conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, password);
                 System.out.println("Database Connected...");
             }
         } catch (SQLException e){
