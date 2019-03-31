@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,9 +23,10 @@ public class Server {
     //client number serves no purpose other than to display how many users are connected
     private int clientNumber = 0;
     //a list of all currently taken user_ids
-    private List<String> user_ids = new ArrayList<>();
+    private List<String> user_ids = Collections.synchronizedList(new ArrayList<>());
+
     //a list of all currently taken lobby_ids
-    private List<String> lobby_ids = new ArrayList<>();
+    private List<String> lobby_ids = Collections.synchronizedList(new ArrayList<>());
     //Hashmap<user_id,client thread/object> the clients thread is stored by their user_id
     private ConcurrentHashMap<String,HandleClient> clientMap = new ConcurrentHashMap<>();
 
@@ -116,6 +118,14 @@ public class Server {
                     break;
                 //packet type 1 = lobby join
                 case 1:
+                    if(lobby_ids.contains(packet.getLobby())) {
+                        String uri = database.getURI(packet.getLobby());
+                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, uri, null, null);
+                        outputToClient.writeObject(returnPacket);
+                    } else {
+                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, null, null, null);
+                        outputToClient.writeObject(returnPacket);
+                    }
                     break;
                 default:
                     System.out.println("Packet Type Mismatch...");
@@ -161,6 +171,7 @@ public class Server {
                 ex.printStackTrace();
             } catch(SocketException ex) {
                 System.out.println("Connection reset/closed for client: " + socket.getInetAddress().getHostName());
+                //remove a user from the database and list
                 return;
             } catch(EOFException ex) {
                 // System.out.println("We're catching this in the final block....");
