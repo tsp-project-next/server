@@ -155,14 +155,20 @@ public class Database {
      * removeUser
      * calls the removeUser procedure from the database
      * @param user_id the user id
-     * @param code the lobby code
-     * @param is_host user host status
      * @return true if successful, else false
      */
-    public boolean removeUser(String user_id, String code, boolean is_host) {
+    public boolean removeUser(String user_id) {
         CallableStatement stmt = null;
-        String query = "{ call removeUser(?, ?, ?) }";
-        return userHelp(stmt, query, user_id, code, is_host);
+        String query = "{ call removeUser(?) }";
+        try {
+            stmt = conn.prepareCall(query);
+            stmt.setString(1, user_id);
+            stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -186,6 +192,21 @@ public class Database {
             else
                 stmt.setInt(3, 0);
             rs = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean editUser(String user_id, String code) {
+        CallableStatement stmt;
+        String query = "{ call editUser(?, ?) }";
+        try {
+            stmt = conn.prepareCall(query);
+            stmt.setString(1, user_id);
+            stmt.setString(1, code);
+            stmt.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
