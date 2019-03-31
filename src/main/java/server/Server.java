@@ -66,7 +66,7 @@ public class Server {
                     user_id = Utilities.generateCode();
                 } while (user_ids.contains(user_id));
                 user_ids.add(user_id);
-                //database.addUser(user_id, null, false);
+                database.addUser(user_id, null, false);
 
                 HandleClient handleClient;
                 new Thread(handleClient = new HandleClient(socket, user_id)).start();
@@ -98,7 +98,7 @@ public class Server {
     }
 
     //Use this method to switch through and handle different received packets
-    public void handleReceivedPacket(Packet packet, ObjectOutputStream outputToClient) {
+    public void handleReceivedPacket(Packet packet, ObjectOutputStream outputToClient, String user_id) {
         try {
             switch(packet.getPacketType()) {
                 //packet type 0 = lobby creation
@@ -110,6 +110,8 @@ public class Server {
                     lobby_ids.add(lobby_id);
                     boolean lobbyCreate = database.addLobby(lobby_id, packet.getPlaylistURI());
                     if(lobbyCreate) {
+                        //need to edit the user to be a host
+                        //database.editUser(user_id, code, isHost)
                         Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, packet.getPlaylistURI(), null, lobby_id);
                         outputToClient.writeObject(returnPacket);
                     } else {
@@ -119,6 +121,8 @@ public class Server {
                 //packet type 1 = lobby join
                 case 1:
                     if(lobby_ids.contains(packet.getLobby())) {
+                        //need to edit the user to be in a lobby
+                        //database.editUser(user_id, code, isHost)
                         String uri = database.getURI(packet.getLobby());
                         Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, uri, null, null);
                         outputToClient.writeObject(returnPacket);
@@ -165,11 +169,12 @@ public class Server {
                     //Read from input
                     Packet packetReceived = (Packet) inputFromClient.readObject();
 
-                    handleReceivedPacket(packetReceived, outputToClient);
+                    handleReceivedPacket(packetReceived, outputToClient, user_id);
                 }
             } catch(ClassNotFoundException ex) {
                 ex.printStackTrace();
             } catch(SocketException ex) {
+                database.removeUser(user_id);
                 System.out.println("Connection reset/closed for client: " + socket.getInetAddress().getHostName());
                 //remove a user from the database and list
                 return;
