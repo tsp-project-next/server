@@ -103,7 +103,7 @@ public class Server {
             switch(packet.getPacketType()) {
                 //packet type 0 = lobby creation
                 case 0:
-                    String lobby_id;
+                    String lobby_id = null;
                     do {
                         lobby_id = Utilities.generateCode();
                     } while (lobby_ids.contains(lobby_id));
@@ -122,7 +122,7 @@ public class Server {
                 case 1:
                     if(lobby_ids.contains(packet.getLobby())) {
                         //need to edit the user to be in a lobby
-                        //database.editUser(user_id, code, isHost)
+                        database.editUser(user_id, packet.getLobby(), false);
                         String uri = database.getURI(packet.getLobby());
                         Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, uri, null, null);
                         outputToClient.writeObject(returnPacket);
@@ -174,16 +174,15 @@ public class Server {
             } catch(ClassNotFoundException ex) {
                 ex.printStackTrace();
             } catch(SocketException ex) {
-                database.removeUser(user_id);
                 System.out.println("Connection reset/closed for client: " + socket.getInetAddress().getHostName());
                 //remove a user from the database and list
-                return;
             } catch(EOFException ex) {
                 // System.out.println("We're catching this in the final block....");
             } catch(IOException ex) {
                 ex.printStackTrace();
             } finally {
                 clientMap.remove(user_id);
+                database.removeUser(user_id);
             }
         }
     }

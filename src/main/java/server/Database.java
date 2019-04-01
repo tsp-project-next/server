@@ -238,11 +238,9 @@ public class Database {
         String query = "select currentsize from lobby where code = ?";
         int ret;
         try {
-            conn.setAutoCommit(false);
             stmt = conn.prepareStatement(query);
             stmt.setString(1, code);
             rs = stmt.executeQuery();
-            conn.commit();
             ret = rs.getInt("currensize");
         }
         catch (SQLException e) {
@@ -264,11 +262,9 @@ public class Database {
         String query = "select playlist_uri from lobby where code = ?";
         String ret;
         try {
-            conn.setAutoCommit(false);
             stmt = conn.prepareStatement(query);
             stmt.setString(1, code);
             rs = stmt.executeQuery();
-            conn.commit();
             rs.next();
             ret = rs.getString("playlist_uri");
         } catch (SQLException e) {
@@ -289,10 +285,8 @@ public class Database {
         int rows;
         String query = "delete from " + table;
         try {
-            conn.setAutoCommit(false);
             stmt = conn.prepareStatement(query);
             rows = stmt.executeUpdate();
-            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;
