@@ -82,6 +82,16 @@ public class ServerTest {
     }
 
     @Test
+    public void editUserTest() {
+        boolean tester = db.addUser("test", null, false);
+        assertEquals(true, tester);
+        tester = db.addLobby("test", "test.io");
+        assertEquals(true, tester);
+        tester = db.editUser("test", "test", true);
+        assertEquals(true, tester);
+    }
+
+    @Test
     public void getURITest() {
         db.addLobby("GURI", "GURI");
         assertEquals("GURI", db.getURI("GURI"));
