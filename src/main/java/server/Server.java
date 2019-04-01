@@ -111,7 +111,7 @@ public class Server {
                     boolean lobbyCreate = database.addLobby(lobby_id, packet.getPlaylistURI());
                     if(lobbyCreate) {
                         //need to edit the user to be a host
-                        //database.editUser(user_id, code, isHost)
+                        database.editUser(user_id, lobby_id, true);
                         Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, packet.getPlaylistURI(), null, lobby_id);
                         outputToClient.writeObject(returnPacket);
                     } else {
