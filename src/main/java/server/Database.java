@@ -199,13 +199,25 @@ public class Database {
         return true;
     }
 
-    public boolean editUser(String user_id, String code) {
+    /**
+     * editUser
+     * calls the editUser procedure from the database
+     * @param user_id the user to be edited
+     * @param code the code of the destination lobby
+     * @param is_host whether or not the user will become the host
+     * @return true if successful, else false
+     */
+    public boolean editUser(String user_id, String code, boolean is_host) {
         CallableStatement stmt;
-        String query = "{ call editUser(?, ?) }";
+        String query = "{ call editUser(?, ?, ?) }";
         try {
             stmt = conn.prepareCall(query);
             stmt.setString(1, user_id);
-            stmt.setString(1, code);
+            stmt.setString(2, code);
+            if (is_host)
+                stmt.setInt(3, 1);
+            else
+                stmt.setInt(3, 0);
             stmt.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
