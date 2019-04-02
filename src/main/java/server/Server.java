@@ -161,23 +161,7 @@ public class Server {
             } catch(IOException ex) {
                 ex.printStackTrace();
             } finally {
-                if(isHost == true) {
-                    //this if statement is order specific and needs to be handled carefully
-                    //send a lobby close packet to all clients
-
-                    //remove the lobby from the lobbymap
-                    lobbyMap.remove(hostMap.get(user_id));
-                    //if they are a host remove them from the hostmap
-                    hostMap.remove(user_id);
-                }
-
-                //make the id value available
-                user_ids.remove(user_id);
-                //remove user from clientMap
-                clientMap.remove(user_id);
-                //remove user from database
-                database.removeUser(user_id);
-                System.out.println("user data for user id: " + user_id + " removed.");
+                removeUser();
             }
         }
 
@@ -230,6 +214,26 @@ public class Server {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+        }
+
+        public void removeUser() {
+            if(isHost == true) {
+                //this if statement is order specific and needs to be handled carefully
+                //send a lobby close packet to all clients
+
+                //remove the lobby from the lobbymap
+                lobbyMap.remove(hostMap.get(user_id));
+                //if they are a host remove them from the hostmap
+                hostMap.remove(user_id);
+            }
+
+            //make the id value available
+            user_ids.remove(user_id);
+            //remove user from clientMap
+            clientMap.remove(user_id);
+            //remove user from database
+            database.removeUser(user_id);
+            System.out.println("user data for user id: " + user_id + " removed.");
         }
     }
 }
