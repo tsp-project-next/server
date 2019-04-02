@@ -183,6 +183,7 @@ public class Server {
             } finally {
                 clientMap.remove(user_id);
                 database.removeUser(user_id);
+                System.out.println("user data for user id: " + user_id + " removed.");
             }
         }
     }
