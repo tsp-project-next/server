@@ -207,6 +207,12 @@ public class Server {
                             outputToClient.writeObject(returnPacket);
                         }
                         break;
+                    //packet type 2 = song update
+                    case 2:
+                        if(lobbyMap.keySet().contains(packet.getLobby())) {
+                            sendPacketToLobby(packet.getLobby(), packet.getPacketIdentifier(), 2, null, null, packet.getLobby());
+                        }
+                        break;
                     default:
                         System.out.println("Packet Type Mismatch...");
                         break;
