@@ -24,11 +24,12 @@ public class Server {
     private int clientNumber = 0;
     //a list of all currently taken user_ids
     private List<String> user_ids = Collections.synchronizedList(new ArrayList<>());
-
-    //a list of all currently taken lobby_ids
-    private List<String> lobby_ids = Collections.synchronizedList(new ArrayList<>());
+    //Hashmap<userid, lobbycode> This is for storing the lobby codes hosts are associated with
+    private ConcurrentHashMap<String,String> hostMap = new ConcurrentHashMap<>();
     //Hashmap<user_id,client thread/object> the clients thread is stored by their user_id
     private ConcurrentHashMap<String,HandleClient> clientMap = new ConcurrentHashMap<>();
+    //Hashmap<lobbycode, arraylist<userids>> each lobby code stores a list of connected users
+    private ConcurrentHashMap<String,ArrayList<String>> lobbyMap = new ConcurrentHashMap<>();
 
     public static void main(String args[]) {
         new Server();
@@ -66,7 +67,6 @@ public class Server {
                     user_id = Utilities.generateCode();
                 } while (user_ids.contains(user_id));
                 user_ids.add(user_id);
-                database.addUser(user_id, null, false);
 
                 HandleClient handleClient;
                 new Thread(handleClient = new HandleClient(socket, user_id)).start();
@@ -76,6 +76,20 @@ public class Server {
 
                 //increment client number
                 clientNumber++;
+            }
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    //sends a packet to all clients within a lobby
+    public void sendPacketToLobby(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+        try {
+            //Create a packet to send
+            Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
+            for (String user_id : lobbyMap.get(lobbyCode)){
+                //send packet to every member of the lobby
+                clientMap.get(user_id).outputToClient.writeObject(packet);
             }
         } catch(IOException ex) {
             ex.printStackTrace();
@@ -97,54 +111,12 @@ public class Server {
         }
     }
 
-    //Use this method to switch through and handle different received packets
-    public void handleReceivedPacket(Packet packet, ObjectOutputStream outputToClient, String user_id) {
-        try {
-            switch(packet.getPacketType()) {
-                //packet type 0 = lobby creation
-                case 0:
-                    String lobby_id = null;
-                    do {
-                        lobby_id = Utilities.generateCode();
-                    } while (lobby_ids.contains(lobby_id));
-                    lobby_ids.add(lobby_id);
-                    boolean lobbyCreate = database.addLobby(lobby_id, packet.getPlaylistURI());
-                    if(lobbyCreate) {
-                        //need to edit the user to be a host
-                        database.editUser(user_id, lobby_id, true);
-                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, packet.getPlaylistURI(), null, lobby_id);
-                        outputToClient.writeObject(returnPacket);
-                    } else {
-                        System.out.println("Failed to create lobby with id: " + lobby_id);
-                    }
-                    break;
-                //packet type 1 = lobby join
-                case 1:
-                    if(lobby_ids.contains(packet.getLobby())) {
-                        //need to edit the user to be in a lobby
-                        database.editUser(user_id, packet.getLobby(), false);
-                        String uri = database.getURI(packet.getLobby());
-                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, uri, null, null);
-                        outputToClient.writeObject(returnPacket);
-                    } else {
-                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, null, null, null);
-                        outputToClient.writeObject(returnPacket);
-                    }
-                    break;
-                default:
-                    System.out.println("Packet Type Mismatch...");
-                    break;
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
     class HandleClient implements Runnable {
 
         private ObjectInputStream inputFromClient;
         private ObjectOutputStream outputToClient;
         private String user_id;
+        private boolean isHost;
 
         //The connected socket
         private Socket socket;
@@ -152,6 +124,14 @@ public class Server {
         public HandleClient(Socket socket, String user_id) {
             this.socket = socket;
             this.user_id = user_id;
+        }
+
+        public void setHost(boolean isHost) {
+            this.isHost = isHost;
+        }
+
+        public boolean isHost() {
+            return isHost;
         }
 
         @Override
@@ -169,7 +149,7 @@ public class Server {
                     //Read from input
                     Packet packetReceived = (Packet) inputFromClient.readObject();
 
-                    handleReceivedPacket(packetReceived, outputToClient, user_id);
+                    handleReceivedPacket(packetReceived);
                 }
             } catch(ClassNotFoundException ex) {
                 ex.printStackTrace();
@@ -181,9 +161,74 @@ public class Server {
             } catch(IOException ex) {
                 ex.printStackTrace();
             } finally {
+                if(isHost == true) {
+                    //this if statement is order specific and needs to be handled carefully
+                    //send a lobby close packet to all clients
+
+                    //remove the lobby from the lobbymap
+                    lobbyMap.remove(hostMap.get(user_id));
+                    //if they are a host remove them from the hostmap
+                    hostMap.remove(user_id);
+                }
+
+                //make the id value available
+                user_ids.remove(user_id);
+                //remove user from clientMap
                 clientMap.remove(user_id);
+                //remove user from database
                 database.removeUser(user_id);
                 System.out.println("user data for user id: " + user_id + " removed.");
+            }
+        }
+
+        //Use this method to switch through and handle different received packets
+        public void handleReceivedPacket(Packet packet) {
+            try {
+                switch(packet.getPacketType()) {
+                    //packet type 0 = lobby creation
+                    case 0:
+                        String lobby_id = null;
+                        //find a lobby id not currently in use
+                        do {
+                            lobby_id = Utilities.generateCode();
+                        } while (lobbyMap.keySet().contains(lobby_id));
+                        lobbyMap.put(lobby_id, new ArrayList<>());
+                        lobbyMap.get(lobby_id).add(user_id);
+                        setHost(true);
+
+                        boolean lobbyCreate = database.addLobby(lobby_id, packet.getPlaylistURI());
+                        //if the lobby was create in the database successfully
+                        if(lobbyCreate) {
+                            //store the userid and the lobby code they are hosting
+                            hostMap.put(user_id, lobby_id);
+                            //add the user to the database
+                            database.addUser(user_id, lobby_id, true);
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, packet.getPlaylistURI(), null, lobby_id);
+                            outputToClient.writeObject(returnPacket);
+                        } else {
+                            System.out.println("Failed to create lobby with id: " + lobby_id);
+                        }
+                        break;
+                    //packet type 1 = lobby join
+                    case 1:
+                        if(lobbyMap.keySet().contains(packet.getLobby())) {
+                            lobbyMap.get(packet.getLobby()).add(user_id);
+                            //need to edit the user to be in a lobby
+                            database.addUser(user_id, packet.getLobby(), false);
+                            String uri = database.getURI(packet.getLobby());
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, uri, null, null);
+                            outputToClient.writeObject(returnPacket);
+                        } else {
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, null, null, null);
+                            outputToClient.writeObject(returnPacket);
+                        }
+                        break;
+                    default:
+                        System.out.println("Packet Type Mismatch...");
+                        break;
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }
     }
