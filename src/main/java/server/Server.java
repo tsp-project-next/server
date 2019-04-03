@@ -96,6 +96,22 @@ public class Server {
         }
     }
 
+    //sends a packet to all clients within a lobby
+    public void sendPacketToLobbyHost(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+        try {
+            //Create a packet to send
+            Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
+            for (String user_id : lobbyMap.get(lobbyCode)){
+                if(hostMap.keySet().contains(user_id) && hostMap.get(user_id).equals(lobbyCode)) {
+                    //send packet to the lobby host
+                    clientMap.get(user_id).outputToClient.writeObject(packet);
+                }
+            }
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     //sends a packet to all clients currently connected to the server
     public void sendPacketToAllClients(String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
         try {
@@ -212,6 +228,12 @@ public class Server {
                         if(lobbyMap.keySet().contains(packet.getLobby())) {
                             sendPacketToLobby(packet.getLobby(), packet.getPacketIdentifier(), 2, null, null, packet.getLobby());
                         }
+                        break;
+                    //packet type 3 = user song update. send to host
+                    case 3:
+                        break;
+                    //packet type 4 = lobby host disconnect
+                    case 4:
                         break;
                     default:
                         System.out.println("Packet Type Mismatch...");
