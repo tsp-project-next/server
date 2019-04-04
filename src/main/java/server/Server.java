@@ -231,6 +231,8 @@ public class Server {
                         break;
                     //packet type 3 = user song update. send to host
                     case 3:
+                        sendPacketToLobbyHost(packet.getLobby(), packet.getPacketIdentifier(), 3, null, packet.getSongURI(), packet.getLobby());
+                        System.out.println("Packet sent to lobby host of code: " + packet.getLobby());
                         break;
                     //packet type 4 = lobby host disconnect
                     case 4:
