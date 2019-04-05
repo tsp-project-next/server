@@ -17,9 +17,9 @@ public class Database {
     public boolean connectDB(int i) {
         try {
             // Please type out username and password here
-            username = "";
-            password = "";
-            conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, password);
+            username = "next";
+            password = "projectnext";
+            conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, password);
             System.out.println("Database Connected...");
 
         } catch (SQLException e){
@@ -326,5 +326,84 @@ public class Database {
             return -1;
         }
         return rowCount;
+    }
+
+    /**
+     * getBlacklist
+     * retrieves the uris of all blacklisted items in the database
+     * @param code the code of the lobby
+     * @return an array of uris
+     */
+    public String[] getBlacklist(String code) {
+        PreparedStatement stmt;
+        ResultSet rs;
+        String query = "select uri from blacklist where code = ?";
+        String sizeQuery = "select count(*) from blacklist";
+        String [] data;
+        try {
+            stmt = conn.prepareStatement(sizeQuery);
+            rs = stmt.executeQuery();
+            rs.next();
+            data = new String[rs.getInt("count(*)")];
+
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, code);
+            rs = stmt.executeQuery();
+
+            int count = 0;
+            while (rs.next()) {
+                data[count] = rs.getString("uri");
+                count++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return data;
+    }
+
+
+    /**
+     * addBlacklist
+     * calls the addBlacklist procedure in the database
+     * @param uri the playlist uri
+     * @param code the lobby code
+     * @return true if successful, else false
+     */
+    public boolean addBlacklist(String uri, String code) {
+        CallableStatement stmt;
+        String query = "{ call addBlacklist(?, ?) }";
+        try {
+            stmt = conn.prepareCall(query);
+            stmt.setString(1, uri);
+            stmt.setString(2, code);
+            stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * removeBlacklist
+     * calls the removeBlacklist procedure in the database
+     * @param uri the playlist uri
+     * @param code the lobby code
+     * @return true if successful, else false
+     */
+    public boolean removeBlacklist(String uri, String code) {
+        CallableStatement stmt;
+        String query = "{ call removeBlacklist(?, ?) }";
+        try {
+            stmt = conn.prepareCall(query);
+            stmt.setString(1, uri);
+            stmt.setString(2, code);
+            stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }
