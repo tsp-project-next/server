@@ -40,7 +40,7 @@ public class Server {
             database = new Database();
             boolean connected = database.connectDB();
             //if the database is not connected then shut down the server
-            if(connected == false) {
+            if(!connected) {
                 System.out.println("Failed to connect to database.");
                 System.out.println("Server stopping...");
                 System.exit(0);
@@ -62,6 +62,7 @@ public class Server {
                 InetAddress address = socket.getInetAddress();
                 System.out.println("Client " + clientNumber + " connected with host name " + address.getHostName());
 
+                //generate a unused userid
                 String user_id;
                 do {
                     user_id = Utilities.generateCode();
@@ -83,7 +84,7 @@ public class Server {
     }
 
     //sends a packet to all clients within a lobby
-    public void sendPacketToLobby(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+    private void sendPacketToLobby(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
         try {
             //Create a packet to send
             Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
@@ -97,7 +98,7 @@ public class Server {
     }
 
     //sends a packet to all clients within a lobby
-    public void sendPacketToLobbyHost(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+    private void sendPacketToLobbyHost(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
         try {
             //Create a packet to send
             Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
@@ -127,6 +128,7 @@ public class Server {
         }
     }
 
+    //inner class to handle each client on a separate thread
     class HandleClient implements Runnable {
 
         private ObjectInputStream inputFromClient;
@@ -171,7 +173,6 @@ public class Server {
                 ex.printStackTrace();
             } catch(SocketException ex) {
                 System.out.println("Connection reset/closed for client: " + socket.getInetAddress().getHostName());
-                //remove a user from the database and list
             } catch(EOFException ex) {
                 // System.out.println("We're catching this in the final block....");
             } catch(IOException ex) {
@@ -187,7 +188,7 @@ public class Server {
                 switch(packet.getPacketType()) {
                     //packet type 0 = lobby creation
                     case 0:
-                        String lobby_id = null;
+                        String lobby_id;
                         //find a lobby id not currently in use
                         do {
                             lobby_id = Utilities.generateCode();
@@ -246,6 +247,7 @@ public class Server {
             }
         }
 
+        //a method used to remove all instances of a specific user from memory and the database
         public void removeUser() {
             if(isHost == true) {
                 //this if statement is order specific and needs to be handled carefully

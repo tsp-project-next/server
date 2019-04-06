@@ -1,7 +1,5 @@
 package server;
 
-import com.mysql.cj.ServerPreparedQueryTestcaseGenerator;
-
 import java.io.Console;
 import java.sql.*;
 import java.util.Scanner;
@@ -17,8 +15,8 @@ public class Database {
     public boolean connectDB(int i) {
         try {
             // Please type out username and password here
-            username = "next";
-            password = "projectnext";
+            username = "";
+            password = "";
             conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, password);
             System.out.println("Database Connected...");
 
@@ -30,6 +28,12 @@ public class Database {
         return true;
     }
 
+    /**
+     * connectDB
+     * attempts to connect to the lobby
+     * prompts to mask input or not to mask input
+     * @return true if successful, else false
+     */
     public boolean connectDB(){
         try{
             Scanner scanner = new Scanner(System.in);
