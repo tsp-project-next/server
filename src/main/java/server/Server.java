@@ -235,8 +235,11 @@ public class Server {
                         sendPacketToLobbyHost(packet.getLobby(), packet.getPacketIdentifier(), 3, null, packet.getSongURI(), packet.getLobby());
                         System.out.println("Packet sent to lobby host of code: " + packet.getLobby());
                         break;
-                    //packet type 4 = lobby host disconnect
+                    //packet type 4 = user disconnect to main landing page
                     case 4:
+                        removeUserLimited();
+                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 4, null, null, null);
+                        outputToClient.writeObject(returnPacket);
                         break;
                     default:
                         System.out.println("Packet Type Mismatch...");
@@ -266,6 +269,24 @@ public class Server {
             //remove user from database
             database.removeUser(user_id);
             System.out.println("user data for user id: " + user_id + " removed.");
+        }
+
+        //a method used to remove all instances of a specific user from the database but keep their client connection
+        public void removeUserLimited() {
+            if(isHost == true) {
+                //this if statement is order specific and needs to be handled carefully
+                //send a lobby close packet to all clients
+
+                //remove the lobby from the lobbymap
+                lobbyMap.remove(hostMap.get(user_id));
+                //if they are a host remove them from the hostmap
+                hostMap.remove(user_id);
+            }
+
+            //remove user from database
+            database.removeUser(user_id);
+            System.out.println("user data for user id: " + user_id + " removed.");
+            setHost(false);
         }
     }
 }
