@@ -84,10 +84,8 @@ public class Server {
     }
 
     //sends a packet to all clients within a lobby
-    private void sendPacketToLobby(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+    private void sendPacketToLobby(String lobbyCode, Packet packet) {
         try {
-            //Create a packet to send
-            Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
             for (String user_id : lobbyMap.get(lobbyCode)){
                 //send packet to every member of the lobby
                 clientMap.get(user_id).outputToClient.writeObject(packet);
@@ -98,10 +96,8 @@ public class Server {
     }
 
     //sends a packet to all clients within a lobby
-    private void sendPacketToLobbyHost(String lobbyCode, String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+    private void sendPacketToLobbyHost(String lobbyCode, Packet packet) {
         try {
-            //Create a packet to send
-            Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
             for (String user_id : lobbyMap.get(lobbyCode)){
                 if(hostMap.keySet().contains(user_id) && hostMap.get(user_id).equals(lobbyCode)) {
                     //send packet to the lobby host
@@ -114,10 +110,8 @@ public class Server {
     }
 
     //sends a packet to all clients currently connected to the server
-    public void sendPacketToAllClients(String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+    public void sendPacketToAllClients(Packet packet) {
         try {
-            //Create a packet to send
-            Packet packet = new Packet(packetIdentifier, packetType, playlistURI, songURI, lobby);
             for (String user_id : clientMap.keySet()){
                 //send packet to every currently registered client
                 clientMap.get(user_id).outputToClient.writeObject(packet);
@@ -204,7 +198,9 @@ public class Server {
                             hostMap.put(user_id, lobby_id);
                             //add the user to the database
                             database.addUser(user_id, lobby_id, true);
-                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0, packet.getPlaylistURI(), null, lobby_id);
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0);
+                            returnPacket.setPlaylistURI(packet.getPlaylistURI());
+                            returnPacket.setLobby(lobby_id);
                             outputToClient.writeObject(returnPacket);
                         } else {
                             System.out.println("Failed to create lobby with id: " + lobby_id);
@@ -217,29 +213,34 @@ public class Server {
                             //need to edit the user to be in a lobby
                             database.addUser(user_id, packet.getLobby(), false);
                             String uri = database.getURI(packet.getLobby());
-                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, uri, null, null);
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1);
+                            returnPacket.setPlaylistURI(uri);
                             outputToClient.writeObject(returnPacket);
                         } else {
-                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1, null, null, null);
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1);
                             outputToClient.writeObject(returnPacket);
                         }
                         break;
                     //packet type 2 = song update
                     case 2:
                         if(lobbyMap.keySet().contains(packet.getLobby())) {
-                            sendPacketToLobby(packet.getLobby(), packet.getPacketIdentifier(), 2, null, null, packet.getLobby());
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 2);
+                            returnPacket.setLobby(packet.getLobby());
+                            sendPacketToLobby(packet.getLobby(), returnPacket);
                         }
                         break;
                     //packet type 3 = user song update. send to host
                     case 3:
-                        sendPacketToLobbyHost(packet.getLobby(), packet.getPacketIdentifier(), 3, null, packet.getSongURI(), packet.getLobby());
+                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 3);
+                        returnPacket.setSongURI(packet.getSongURI());
+                        returnPacket.setLobby(packet.getLobby());
+                        sendPacketToLobbyHost(packet.getLobby(), returnPacket);
                         System.out.println("Packet sent to lobby host of code: " + packet.getLobby());
                         break;
                     //packet type 4 = user disconnect to main landing page
                     case 4:
                         removeUserLimited();
-                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 4, null, null, null);
-                        outputToClient.writeObject(returnPacket);
+                        outputToClient.writeObject(packet);
                         break;
                     default:
                         System.out.println("Packet Type Mismatch...");

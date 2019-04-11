@@ -1,6 +1,7 @@
 package client;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Packet implements Serializable {
 
@@ -14,12 +15,19 @@ public class Packet implements Serializable {
 
     private String lobby  = null;
 
-    public Packet(String packetIdentifier, int packetType, String playlistURI, String songURI, String lobby) {
+    private ArrayList<String> userids = null;
+
+    public Packet(String packetIdentifier, int packetType) {
         this.packetIdentifier = packetIdentifier;
         this.packetType = packetType;
-        this.playlistURI = playlistURI;
-        this.songURI = songURI;
-        this.lobby = lobby;
+    }
+
+    public void setUserIds(ArrayList<String> userids) {
+        this.userids = userids;
+    }
+
+    public ArrayList<String> getUserIds() {
+        return userids;
     }
 
     public void setLobby(String str) {
