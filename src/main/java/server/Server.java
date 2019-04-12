@@ -216,6 +216,11 @@ public class Server {
                             Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1);
                             returnPacket.setPlaylistURI(uri);
                             outputToClient.writeObject(returnPacket);
+
+                            //sending a packet
+                            Packet returnPacketUserIds = new Packet(null, 5);
+                            returnPacketUserIds.setUserIds(lobbyMap.get(packet.getLobby()));
+                            outputToClient.writeObject(returnPacketUserIds);
                         } else {
                             Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1);
                             outputToClient.writeObject(returnPacket);
@@ -241,6 +246,9 @@ public class Server {
                     case 4:
                         removeUserLimited();
                         outputToClient.writeObject(packet);
+                        break;
+                    //packet type 5 = update userid list
+                    case 5:
                         break;
                     default:
                         System.out.println("Packet Type Mismatch...");
