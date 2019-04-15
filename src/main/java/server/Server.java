@@ -101,6 +101,7 @@ public class Server {
             for (String user_id : lobbyMap.get(lobbyCode)){
                 if(hostMap.keySet().contains(user_id) && hostMap.get(user_id).equals(lobbyCode)) {
                     //send packet to the lobby host
+
                     clientMap.get(user_id).outputToClient.writeObject(packet);
                 }
             }
@@ -210,6 +211,7 @@ public class Server {
                     case 1:
                         if(lobbyMap.keySet().contains(packet.getLobby())) {
                             lobbyMap.get(packet.getLobby()).add(user_id);
+
                             //need to edit the user to be in a lobby
                             database.addUser(user_id, packet.getLobby(), false);
                             String uri = database.getURI(packet.getLobby());
@@ -217,10 +219,10 @@ public class Server {
                             returnPacket.setPlaylistURI(uri);
                             outputToClient.writeObject(returnPacket);
 
-                            //sending a packet
-                            Packet returnPacketUserIds = new Packet(null, 5);
+                            Packet returnPacketUserIds = new Packet(packet.getPacketIdentifier(), 5);
                             returnPacketUserIds.setUserIds(lobbyMap.get(packet.getLobby()));
-                            outputToClient.writeObject(returnPacketUserIds);
+                            returnPacketUserIds.setLobby(packet.getLobby());
+                            sendPacketToLobbyHost(packet.getLobby(), returnPacketUserIds);
                         } else {
                             Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1);
                             outputToClient.writeObject(returnPacket);
@@ -244,12 +246,25 @@ public class Server {
                         break;
                     //packet type 4 = user disconnect to main landing page
                     case 4:
-                        removeUserLimited();
-                        outputToClient.writeObject(packet);
+                        if(isHost()) {
+                            Packet sendUsersToLandingPage = new Packet(packet.getPacketIdentifier(), 6);
+                            sendUsersToLandingPage.setLobby(packet.getLobby());
+                            sendPacketToLobby(packet.getLobby(), sendUsersToLandingPage);
+                            removeUserLimited();
+                        } else {
+                            removeUserLimited();
+                        }
                         break;
                     //packet type 5 = update userid list
                     case 5:
                         break;
+
+                    case 6:
+                        Packet sendUsersToLanding = new Packet(packet.getPacketIdentifier(), 6);
+                        sendUsersToLanding.setLobby(packet.getLobby());
+                        sendPacketToLobby(packet.getLobby(), sendUsersToLanding);
+                        break;
+
                     default:
                         System.out.println("Packet Type Mismatch...");
                         break;
