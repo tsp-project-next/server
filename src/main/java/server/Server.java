@@ -231,18 +231,55 @@ public class Server {
                     //packet type 2 = song update
                     case 2:
                         if(lobbyMap.keySet().contains(packet.getLobby())) {
-                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 2);
-                            returnPacket.setLobby(packet.getLobby());
-                            sendPacketToLobby(packet.getLobby(), returnPacket);
+                            boolean isInBlacklist = false;
+
+                            String[] blacklist = database.getBlacklist(packet.getLobby());
+
+                            for(int i = 0; i < blacklist.length; i++) {
+
+                                if(blacklist[i].equals(packet.getSongURI())) {
+
+                                    isInBlacklist = true;
+                                    break;
+                                }
+
+                            }
+
+                            if(!isInBlacklist) {
+                                Packet returnPacket = new Packet(packet.getPacketIdentifier(), 2);
+                                returnPacket.setLobby(packet.getLobby());
+                                sendPacketToLobby(packet.getLobby(), returnPacket);
+                            } else {
+                                Packet sendBlackListPromptHost = new Packet(packet.getPacketIdentifier(), 7);
+                                outputToClient.writeObject(sendBlackListPromptHost);
+                            }
                         }
                         break;
                     //packet type 3 = user song update. send to host
                     case 3:
-                        Packet returnPacket = new Packet(packet.getPacketIdentifier(), 3);
-                        returnPacket.setSongURI(packet.getSongURI());
-                        returnPacket.setLobby(packet.getLobby());
-                        sendPacketToLobbyHost(packet.getLobby(), returnPacket);
-                        System.out.println("Packet sent to lobby host of code: " + packet.getLobby());
+                        boolean isInBlacklist = false;
+
+                        String[] blacklist = database.getBlacklist(packet.getLobby());
+
+                        for(int i = 0; i < blacklist.length; i++) {
+
+                            if(blacklist[i].equals(packet.getSongURI())) {
+
+                                isInBlacklist = true;
+                                break;
+                            }
+
+                        }
+                        if(!isInBlacklist) {
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 3);
+                            returnPacket.setSongURI(packet.getSongURI());
+                            returnPacket.setLobby(packet.getLobby());
+                            sendPacketToLobbyHost(packet.getLobby(), returnPacket);
+                            System.out.println("Packet sent to lobby host of code: " + packet.getLobby());
+                        } else {
+                            Packet sendBlackListPromptUser = new Packet(packet.getPacketIdentifier(), 7);
+                            outputToClient.writeObject(sendBlackListPromptUser);
+                        }
                         break;
                     //packet type 4 = user disconnect to main landing page
                     case 4:
@@ -259,10 +296,23 @@ public class Server {
                     case 5:
                         break;
 
+                    //packet type 6 = send users to landing page if host leaves
                     case 6:
                         Packet sendUsersToLanding = new Packet(packet.getPacketIdentifier(), 6);
                         sendUsersToLanding.setLobby(packet.getLobby());
                         sendPacketToLobby(packet.getLobby(), sendUsersToLanding);
+                        break;
+
+                    //packet type 7 = song is in black list
+                    case 7:
+                        break;
+
+                    //packet type 8 = add to black list
+                    case 8:
+                        database.addBlacklist(packet.getBlackListURI(), packet.getLobby());
+                        Packet added = new Packet(packet.getPacketIdentifier(), 8);
+                        added.setLobby(packet.getLobby());
+                        outputToClient.writeObject(added);
                         break;
 
                     default:
