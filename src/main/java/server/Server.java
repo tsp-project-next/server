@@ -304,9 +304,19 @@ public class Server {
 
                     //packet type 6 = send users to landing page if host leaves
                     case 6:
-                        Packet sendUsersToLanding = new Packet(packet.getPacketIdentifier(), 6);
-                        sendUsersToLanding.setLobby(packet.getLobby());
-                        sendPacketToLobby(packet.getLobby(), sendUsersToLanding);
+                        if(isHost()) {
+                            Packet sendUsersToLanding = new Packet(packet.getPacketIdentifier(), 6);
+                            sendUsersToLanding.setLobby(packet.getLobby());
+                            sendPacketToLobby(packet.getLobby(), sendUsersToLanding);
+                        } else {
+                            lobbyMap.get(packet.getLobby()).remove(user_id);
+                            removeUser();
+                            //send update to host about a user returning to landing page
+                            Packet returnPacketUserIds = new Packet(packet.getPacketIdentifier(), 5);
+                            returnPacketUserIds.setUserIds(lobbyMap.get(packet.getLobby()));
+                            returnPacketUserIds.setLobby(packet.getLobby());
+                            sendPacketToLobbyHost(packet.getLobby(), returnPacketUserIds);
+                        }
                         break;
 
                     //packet type 7 = song is in black list

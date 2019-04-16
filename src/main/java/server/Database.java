@@ -15,8 +15,8 @@ public class Database {
     public boolean connectDB(int i) {
         try {
             // Please type out username and password here
-            username = "";
-            password = "";
+            username = "next";
+            password = "projectnext";
             conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, password);
             System.out.println("Database Connected...");
 
@@ -389,25 +389,25 @@ public class Database {
         return true;
     }
 
-    /**
-     * removeBlacklist
-     * calls the removeBlacklist procedure in the database
-     * @param uri the playlist uri
-     * @param code the lobby code
-     * @return true if successful, else false
-     */
-    public boolean removeBlacklist(String uri, String code) {
-        CallableStatement stmt;
-        String query = "{ call removeBlacklist(?, ?) }";
-        try {
-            stmt = conn.prepareCall(query);
-            stmt.setString(1, uri);
-            stmt.setString(2, code);
-            stmt.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
+//    /**
+//     * removeBlacklist
+//     * calls the removeBlacklist procedure in the database
+//     * @param uri the playlist uri
+//     * @param code the lobby code
+//     * @return true if successful, else false
+//     */
+//    public boolean removeBlacklist(String uri, String code) {
+//        CallableStatement stmt;
+//        String query = "{ call removeBlacklist(?, ?) }";
+//        try {
+//            stmt = conn.prepareCall(query);
+//            stmt.setString(1, uri);
+//            stmt.setString(2, code);
+//            stmt.executeQuery();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//        return true;
+//    }
 }
