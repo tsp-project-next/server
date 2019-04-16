@@ -289,7 +289,13 @@ public class Server {
                             sendPacketToLobby(packet.getLobby(), sendUsersToLandingPage);
                             removeUserLimited();
                         } else {
+                            lobbyMap.get(packet.getLobby()).remove(user_id);
                             removeUserLimited();
+                            //send update to host about a user returning to landing page
+                            Packet returnPacketUserIds = new Packet(packet.getPacketIdentifier(), 5);
+                            returnPacketUserIds.setUserIds(lobbyMap.get(packet.getLobby()));
+                            returnPacketUserIds.setLobby(packet.getLobby());
+                            sendPacketToLobbyHost(packet.getLobby(), returnPacketUserIds);
                         }
                         break;
                     //packet type 5 = update userid list
