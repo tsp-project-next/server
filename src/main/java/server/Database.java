@@ -15,8 +15,8 @@ public class Database {
     public boolean connectDB(int i) {
         try {
             // Please type out username and password here
-            username = "next";
-            password = "projectnext";
+            username = "";
+            password = "";
             conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, password);
             System.out.println("Database Connected...");
 
