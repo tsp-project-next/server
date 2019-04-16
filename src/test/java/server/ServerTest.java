@@ -46,12 +46,14 @@ public class ServerTest {
     public void init() {
         db.deleteTableRows(users);
         db.deleteTableRows(lobby);
+        db.deleteTableRows("blacklist");
     }
 
     @After
     public void finalilze() {
         db.deleteTableRows(users);
         db.deleteTableRows(lobby);
+        db.deleteTableRows("blacklist");
     }
 
     @Test
@@ -96,7 +98,7 @@ public class ServerTest {
         db.addLobby("GURI", "GURI");
         assertEquals("GURI", db.getURI("GURI"));
     }
-    
+
     @Test
     public void printTableRowsTest() {
         db.addLobby("1234", "1234");
@@ -119,5 +121,68 @@ public class ServerTest {
         assertEquals(lobbySize, db.deleteTableRows(lobby));
         lobbySize = 0;
         usersSize = 0;
+    }
+
+    @Test
+    public void getBlacklistTest() {
+        db.addLobby("asdf", "asdf");
+        db.addBlacklist("test.io", "asdf");
+        db.addBlacklist("io.test", "asdf");
+        String [] actual = db.getBlacklist("asdf");
+        assertEquals(true, contains(actual, "test.io"));
+        assertEquals(true, contains(actual, "io.test"));
+    }
+
+    private boolean contains(String [] array, String tester) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].equals(tester))
+                return true;
+        }
+        return false;
+    }
+
+    @Test
+    public void addBlacklistTest() {
+        int blSize;
+        int expectedSize = 5;
+        db.addLobby("asdf", "asdf");
+        assertEquals(true, db.addBlacklist("test.io", "asdf"));
+        assertEquals(true, db.addBlacklist("tester.io", "asdf"));
+        assertEquals(true, db.addBlacklist("asdf.io", "asdf"));
+        assertEquals(true, db.addBlacklist("fdsa.io", "asdf"));
+        assertEquals(true, db.addBlacklist("qwer.io", "asdf"));
+        blSize = getTableSize("blacklist");
+        assertEquals(expectedSize, blSize);
+    }
+
+    @Test
+    public void removeBlacklistTest() {
+        db.addLobby("asdf", "asdf");
+
+        db.addBlacklist("test.io", "asdf");
+        db.addBlacklist("tester.io", "asdf");
+        db.addBlacklist("asdf.io", "asdf");
+        db.addBlacklist("fdsa.io", "asdf");
+        db.addBlacklist("qwer.io", "asdf");
+
+        assertEquals(true, db.removeBlacklist("test.io", "asdf"));
+        assertEquals(true, db.removeBlacklist("tester.io", "asdf"));
+        assertEquals(true, db.removeBlacklist("asdf.io", "asdf"));
+        assertEquals(true, db.removeBlacklist("fdsa.io", "asdf"));
+        assertEquals(true, db.removeBlacklist("qwer.io", "asdf"));
+        assertEquals(0, getTableSize("blacklist"));
+    }
+
+    @Test
+    public void isBlacklistedTest() {
+        db.addLobby("asdf", "asdf");
+
+        db.addBlacklist("test.io", "asdf");
+        db.addBlacklist("io.test", "asdf");
+
+        assertEquals(true, db.isBlacklisted("test.io", "asdf"));
+        assertEquals(true, db.isBlacklisted("io.test", "asdf"));
+        assertEquals(false, db.isBlacklisted("asdf.io", "asdf"));
+        assertEquals(false, db.isBlacklisted("asdf.io", "qwer"));
     }
 }
