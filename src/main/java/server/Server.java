@@ -100,8 +100,8 @@ public class Server {
         try {
             for (String user_id : lobbyMap.get(lobbyCode)){
                 if(hostMap.keySet().contains(user_id) && hostMap.get(user_id).equals(lobbyCode)) {
+                    clientMap.get(user_id).outputToClient.reset();
                     //send packet to the lobby host
-
                     clientMap.get(user_id).outputToClient.writeObject(packet);
                 }
             }
