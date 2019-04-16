@@ -20,7 +20,7 @@ public class Database {
             conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, password);
             System.out.println("Database Connected...");
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
             //e.printStackTrace();
             return false;
@@ -32,24 +32,25 @@ public class Database {
      * connectDB
      * attempts to connect to the lobby
      * prompts to mask input or not to mask input
+     *
      * @return true if successful, else false
      */
-    public boolean connectDB(){
-        try{
+    public boolean connectDB() {
+        try {
             Scanner scanner = new Scanner(System.in);
-            if(scanner == null){
+            if (scanner == null) {
                 System.out.println("Scanner is null.");
                 return false;
             }
             System.out.print("Do you want to mask input (y/n): ");
             String response = scanner.nextLine();
-            if(response.charAt(0) == 'y' || response.charAt(0) == 'Y') {
+            if (response.charAt(0) == 'y' || response.charAt(0) == 'Y') {
                 mask = true;
             }
 
-            if(mask == true) {
+            if (mask == true) {
                 Console console = System.console();
-                if(console == null){
+                if (console == null) {
                     System.out.println("Console is null. Run the program in terminal.");
                     return false;
                 }
@@ -61,20 +62,20 @@ public class Database {
                 System.out.print("Please enter your password: ");
                 password = scanner.nextLine();
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             return false;
         }
 
         try {
-            if(mask == true) {
+            if (mask == true) {
                 conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, new String(maskedPassword));
                 System.out.println("Database Connected...");
             } else {
                 conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, password);
                 System.out.println("Database Connected...");
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
             //e.printStackTrace();
             return false;
@@ -82,10 +83,10 @@ public class Database {
         return true;
     }
 
-    public void disconnectDB(){
-        try{
+    public void disconnectDB() {
+        try {
             conn.close();
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             System.out.println("SQLState: " + e.getSQLState());
             System.out.println("Vendor: " + e.getErrorCode());
@@ -100,8 +101,9 @@ public class Database {
     /**
      * addLobby
      * calls the add lobby procedure from the database
+     *
      * @param code the lobby code
-     * @param uri the playlist uri
+     * @param uri  the playlist uri
      * @return true if succesful, else false
      */
     public boolean addLobby(String code, String uri) {
@@ -123,6 +125,7 @@ public class Database {
     /**
      * removeLobby
      * calls the remove lobby procedure from the database
+     *
      * @param code the lobby code
      * @return true if succesful, else false
      */
@@ -144,8 +147,9 @@ public class Database {
     /**
      * addUser
      * calls the addUser procedure from the database
+     *
      * @param user_id the user id
-     * @param code the lobby code
+     * @param code    the lobby code
      * @param is_host user host status
      * @return true if successful, else false
      */
@@ -158,6 +162,7 @@ public class Database {
     /**
      * removeUser
      * calls the removeUser procedure from the database
+     *
      * @param user_id the user id
      * @return true if successful, else false
      */
@@ -178,10 +183,11 @@ public class Database {
     /**
      * userHelp
      * deals with the statements prepared by remove and addUser
-     * @param stmt the sql statement
-     * @param query the query to be executed
+     *
+     * @param stmt    the sql statement
+     * @param query   the query to be executed
      * @param user_id user id
-     * @param code lobby code
+     * @param code    lobby code
      * @param is_host user host status
      * @return true if successful, else false
      */
@@ -206,8 +212,9 @@ public class Database {
     /**
      * editUser
      * calls the editUser procedure from the database
+     *
      * @param user_id the user to be edited
-     * @param code the code of the destination lobby
+     * @param code    the code of the destination lobby
      * @param is_host whether or not the user will become the host
      * @return true if successful, else false
      */
@@ -233,6 +240,7 @@ public class Database {
     /**
      * getLobbySize
      * returns the size of a lobby
+     *
      * @param code the lobby code
      * @return the size of the lobby
      */
@@ -246,8 +254,7 @@ public class Database {
             stmt.setString(1, code);
             rs = stmt.executeQuery();
             ret = rs.getInt("currensize");
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return -1;
         }
@@ -257,6 +264,7 @@ public class Database {
     /**
      * getURI
      * retrieves the playlist uri of a lobby
+     *
      * @param code the lobby code
      * @return the playlist uri
      */
@@ -281,6 +289,7 @@ public class Database {
     /**
      * deleteTableRows
      * deletes all rows in a table
+     *
      * @param table the table name to have its rows deleted
      * @return the number of rows deleted
      */
@@ -301,10 +310,11 @@ public class Database {
     /**
      * printTableRows
      * prints the rows of a given table
+     *
      * @param table table to be printed
      * @return the number of rows in the table
      */
-    public int  printTableRows(String table) {
+    public int printTableRows(String table) {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String query = "select * from " + table;
@@ -318,8 +328,7 @@ public class Database {
                     System.out.println(rs.getString(1) + " " + rs.getString(2)
                             + " " + rs.getInt(3) + " " + rs.getInt(4));
                     rowCount++;
-                }
-                else if (table.toLowerCase().equals("users")) {
+                } else if (table.toLowerCase().equals("users")) {
                     System.out.println(rs.getString(1) + " " + rs.getString(2)
                             + " " + rs.getInt(3));
                     rowCount++;
@@ -335,6 +344,7 @@ public class Database {
     /**
      * getBlacklist
      * retrieves the uris of all blacklisted items in the database
+     *
      * @param code the code of the lobby
      * @return an array of uris
      */
@@ -343,7 +353,7 @@ public class Database {
         ResultSet rs;
         String query = "select uri from blacklist where code = ?";
         String sizeQuery = "select count(*) from blacklist";
-        String [] data;
+        String[] data;
         try {
             stmt = conn.prepareStatement(sizeQuery);
             rs = stmt.executeQuery();
@@ -370,7 +380,8 @@ public class Database {
     /**
      * addBlacklist
      * calls the addBlacklist procedure in the database
-     * @param uri the playlist uri
+     *
+     * @param uri  the playlist uri
      * @param code the lobby code
      * @return true if successful, else false
      */
@@ -389,25 +400,50 @@ public class Database {
         return true;
     }
 
-//    /**
-//     * removeBlacklist
-//     * calls the removeBlacklist procedure in the database
-//     * @param uri the playlist uri
-//     * @param code the lobby code
-//     * @return true if successful, else false
-//     */
-//    public boolean removeBlacklist(String uri, String code) {
-//        CallableStatement stmt;
-//        String query = "{ call removeBlacklist(?, ?) }";
-//        try {
-//            stmt = conn.prepareCall(query);
-//            stmt.setString(1, uri);
-//            stmt.setString(2, code);
-//            stmt.executeQuery();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//        return true;
-//    }
+    /**
+     * removeBlacklist
+     * calls the removeBlacklist procedure in the database
+     *
+     * @param uri  the playlist uri
+     * @param code the lobby code
+     * @return true if successful, else false
+     */
+    public boolean removeBlacklist(String uri, String code) {
+        CallableStatement stmt;
+        String query = "{ call removeBlacklist(?, ?) }";
+        try {
+            stmt = conn.prepareCall(query);
+            stmt.setString(1, uri);
+            stmt.setString(2, code);
+            stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * isBlacklisted
+     * tests to see if a uri is in a lobby's blacklist
+     *
+     * @param uri  the uri to be tested
+     * @param code the lobby code
+     * @return true if the uri is in the blacklist, else false
+     */
+    public boolean isBlacklisted(String uri, String code) {
+        String[] blacklist = getBlacklist(code);
+        if (blacklist == null)
+            return false;
+        for (int i = 0; i < blacklist.length; i++) {
+            System.out.println(blacklist[i]);
+            if (blacklist[i] == null)
+                continue;
+            if (blacklist[i].equals(uri)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
