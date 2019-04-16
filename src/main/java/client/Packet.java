@@ -17,14 +17,21 @@ public class Packet implements Serializable {
 
     private ArrayList<String> userids = null;
 
+    private String blackListURI = null;
+
     public Packet(String packetIdentifier, int packetType) {
         this.packetIdentifier = packetIdentifier;
         this.packetType = packetType;
     }
 
+    public void setBlackListURI(String str) {this.blackListURI = str;}
+
+    public String getBlackListURI() {return blackListURI;}
+
     public void setUserIds(ArrayList<String> userids) {
         this.userids = userids;
     }
+
 
     public ArrayList<String> getUserIds() {
         return userids;
