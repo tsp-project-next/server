@@ -1,5 +1,10 @@
 package server;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.sql.*;
+import java.util.Scanner;
+
 import org.junit.Test;
 import org.junit.BeforeClass;
 import org.junit.*;
@@ -38,7 +43,18 @@ public class ServerTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        db.connectDB(1);
+        File file = new File("src/test/java/server/creds.test");
+        String username = null;
+        String password = null;
+        try {
+            Scanner reader = new Scanner(file);
+            username = reader.nextLine();
+            password = reader.nextLine();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        db.connectDB(username, password);
         conn = db.getConn();
     }
 

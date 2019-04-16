@@ -12,11 +12,15 @@ public class Database {
     private boolean mask = false;
     private char[] maskedPassword = null;
 
-    public boolean connectDB(int i) {
+    public boolean connectDB(String u, String p) {
         try {
-            // Please type out username and password here
-            username = "";
-            password = "";
+
+            username = u;
+            password = p;
+
+            if (username == null || password == null)
+                return false;
+
             conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, password);
             System.out.println("Database Connected...");
 
