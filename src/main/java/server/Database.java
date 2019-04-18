@@ -12,6 +12,8 @@ public class Database {
     private boolean mask = false;
     private char[] maskedPassword = null;
 
+    private static boolean debugBuild = false;
+
     public boolean connectDB(String u, String p) {
         try {
 
@@ -73,11 +75,21 @@ public class Database {
 
         try {
             if (mask == true) {
-                conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, new String(maskedPassword));
-                System.out.println("Database Connected...");
+                if (debugBuild) {
+                    conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, new String(maskedPassword));
+                    System.out.println("Database Connected Test Build...");
+                } else {
+                    conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, new String(maskedPassword));
+                    System.out.println("Database Connected...");
+                }
             } else {
-                conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, password);
-                System.out.println("Database Connected...");
+                if (debugBuild) {
+                    conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnexttest", username, password);
+                    System.out.println("Database Connected Test Build...");
+                } else {
+                    conn = DriverManager.getConnection("jdbc:mysql://" + "78.46.43.55" + ":3306/pnext", username, password);
+                    System.out.println("Database Connected...");
+                }
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());

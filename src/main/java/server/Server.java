@@ -20,6 +20,8 @@ public class Server {
     private ServerSocket serverSocket;
     private Database database;
 
+    private static boolean debugBuild = false;
+
     //client number serves no purpose other than to display how many users are connected
     private int clientNumber = 0;
     //a list of all currently taken user_ids
@@ -32,6 +34,7 @@ public class Server {
     private ConcurrentHashMap<String,ArrayList<String>> lobbyMap = new ConcurrentHashMap<>();
 
     public static void main(String args[]) {
+
         new Server();
     }
 
@@ -184,6 +187,20 @@ public class Server {
                     //packet type 0 = lobby creation
                     case 0:
                         String lobby_id;
+
+                        // DEBUG PYTHON TESTING
+
+                        if (debugBuild) {
+                            System.out.println("We saw debug packet type 0");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0);
+                            returnPacket.setPlaylistURI(packet.getPlaylistURI());
+                            returnPacket.setLobby("aaaa");
+                            outputToClient.writeObject(returnPacket);
+                            return;
+                        }
+
+                        // END DEBUG PYTHON TESTING
+
                         //find a lobby id not currently in use
                         do {
                             lobby_id = Utilities.generateCode();
@@ -209,6 +226,15 @@ public class Server {
                         break;
                     //packet type 1 = lobby join
                     case 1:
+
+                        // DEBUG PYTHON TESTING
+
+                        if (debugBuild) {
+
+                        }
+
+                        // END DEBUG PYTHON TESTING
+
                         if(lobbyMap.keySet().contains(packet.getLobby())) {
                             lobbyMap.get(packet.getLobby()).add(user_id);
 
@@ -230,6 +256,15 @@ public class Server {
                         break;
                     //packet type 2 = song update
                     case 2:
+
+                        // DEBUG PYTHON TESTING
+
+                        if (debugBuild) {
+
+                        }
+
+                        // END DEBUG PYTHON TESTING
+
                         if(lobbyMap.keySet().contains(packet.getLobby())) {
                             boolean isInBlacklist = false;
 
@@ -257,6 +292,15 @@ public class Server {
                         break;
                     //packet type 3 = user song update. send to host
                     case 3:
+
+                        // DEBUG PYTHON TESTING
+
+                        if (debugBuild) {
+
+                        }
+
+                        // END DEBUG PYTHON TESTING
+
                         boolean isInBlacklist = false;
 
                         String[] blacklist = database.getBlacklist(packet.getLobby());
@@ -283,6 +327,15 @@ public class Server {
                         break;
                     //packet type 4 = user disconnect to main landing page
                     case 4:
+
+                        // DEBUG PYTHON TESTING
+
+                        if (debugBuild) {
+
+                        }
+
+                        // END DEBUG PYTHON TESTING
+
                         if(isHost()) {
                             Packet sendUsersToLandingPage = new Packet(packet.getPacketIdentifier(), 6);
                             sendUsersToLandingPage.setLobby(packet.getLobby());
@@ -304,6 +357,15 @@ public class Server {
 
                     //packet type 6 = send users to landing page if host leaves
                     case 6:
+
+                        // DEBUG PYTHON TESTING
+
+                        if (debugBuild) {
+
+                        }
+
+                        // END DEBUG PYTHON TESTING
+
                         if(isHost()) {
                             Packet sendUsersToLanding = new Packet(packet.getPacketIdentifier(), 6);
                             sendUsersToLanding.setLobby(packet.getLobby());
@@ -325,6 +387,15 @@ public class Server {
 
                     //packet type 8 = add to black list
                     case 8:
+
+                        // DEBUG PYTHON TESTING
+
+                        if (debugBuild) {
+
+                        }
+
+                        // END DEBUG PYTHON TESTING
+
                         database.addBlacklist(packet.getBlackListURI(), packet.getLobby());
                         Packet added = new Packet(packet.getPacketIdentifier(), 8);
                         added.setLobby(packet.getLobby());
