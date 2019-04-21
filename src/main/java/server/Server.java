@@ -20,7 +20,7 @@ public class Server {
     private ServerSocket serverSocket;
     private Database database;
 
-    private static boolean debugBuild = false;
+    private static boolean debugBuild = true;
 
     //client number serves no purpose other than to display how many users are connected
     private int clientNumber = 0;
@@ -195,6 +195,7 @@ public class Server {
                             Packet returnPacket = new Packet(packet.getPacketIdentifier(), 0);
                             returnPacket.setPlaylistURI(packet.getPlaylistURI());
                             returnPacket.setLobby("aaaa");
+                            outputToClient.flush();
                             outputToClient.writeObject(returnPacket);
                             return;
                         }
@@ -230,7 +231,12 @@ public class Server {
                         // DEBUG PYTHON TESTING
 
                         if (debugBuild) {
-
+                            System.out.println("Debug packet type 1");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 1);
+                            returnPacket.setPlaylistURI("this:is:a:playlist:uri");
+                            outputToClient.flush();
+                            outputToClient.writeObject(returnPacket);
+                            return;
                         }
 
                         // END DEBUG PYTHON TESTING
@@ -260,7 +266,10 @@ public class Server {
                         // DEBUG PYTHON TESTING
 
                         if (debugBuild) {
-
+                            System.out.println("Debug packet type 2");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 2);
+                            outputToClient.writeObject(returnPacket);
+                            return;
                         }
 
                         // END DEBUG PYTHON TESTING
@@ -296,7 +305,13 @@ public class Server {
                         // DEBUG PYTHON TESTING
 
                         if (debugBuild) {
-
+                            System.out.println("Debug packet type 3");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 3);
+                            returnPacket.setSongURI(packet.getSongURI());
+                            returnPacket.setLobby(packet.getLobby());
+                            outputToClient.flush();
+                            outputToClient.writeObject(returnPacket);
+                            return;
                         }
 
                         // END DEBUG PYTHON TESTING
@@ -331,7 +346,12 @@ public class Server {
                         // DEBUG PYTHON TESTING
 
                         if (debugBuild) {
-
+                            System.out.println("Debug packet type 4");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 4);
+                            returnPacket.setLobby(packet.getLobby());
+                            outputToClient.flush();
+                            outputToClient.writeObject(returnPacket);
+                            return;
                         }
 
                         // END DEBUG PYTHON TESTING
@@ -353,6 +373,15 @@ public class Server {
                         break;
                     //packet type 5 = update userid list
                     case 5:
+                        if (debugBuild) {
+                            System.out.println("Debug packet type 5");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 4);
+                            returnPacket.setLobby(packet.getLobby());
+                            outputToClient.flush();
+                            outputToClient.writeObject(returnPacket);
+                            return;
+                        }
+
                         break;
 
                     //packet type 6 = send users to landing page if host leaves
@@ -361,7 +390,12 @@ public class Server {
                         // DEBUG PYTHON TESTING
 
                         if (debugBuild) {
-
+                            System.out.println("Debug packet type 6");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 4);
+                            returnPacket.setLobby(packet.getLobby());
+                            outputToClient.flush();
+                            outputToClient.writeObject(returnPacket);
+                            return;
                         }
 
                         // END DEBUG PYTHON TESTING
@@ -383,6 +417,16 @@ public class Server {
 
                     //packet type 7 = song is in black list
                     case 7:
+
+                        if (debugBuild) {
+                            System.out.println("Debug packet type 7");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 4);
+                            returnPacket.setLobby(packet.getLobby());
+                            outputToClient.flush();
+                            outputToClient.writeObject(returnPacket);
+                            return;
+                        }
+
                         break;
 
                     //packet type 8 = add to black list
@@ -391,7 +435,12 @@ public class Server {
                         // DEBUG PYTHON TESTING
 
                         if (debugBuild) {
-
+                            System.out.println("Debug packet type 8");
+                            Packet returnPacket = new Packet(packet.getPacketIdentifier(), 4);
+                            returnPacket.setLobby(packet.getLobby());
+                            outputToClient.flush();
+                            outputToClient.writeObject(returnPacket);
+                            return;
                         }
 
                         // END DEBUG PYTHON TESTING
