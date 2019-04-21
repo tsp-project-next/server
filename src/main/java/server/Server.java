@@ -20,7 +20,7 @@ public class Server {
     private ServerSocket serverSocket;
     private Database database;
 
-    private static boolean debugBuild = false;
+    private static boolean debugBuild = true;
 
     //client number serves no purpose other than to display how many users are connected
     private int clientNumber = 0;
@@ -268,6 +268,8 @@ public class Server {
                         if (debugBuild) {
                             System.out.println("Debug packet type 2");
                             Packet returnPacket = new Packet(packet.getPacketIdentifier(), 2);
+                            returnPacket.setSongURI(packet.getSongURI());
+                            returnPacket.setLobby(packet.getLobby());
                             outputToClient.writeObject(returnPacket);
                             return;
                         }

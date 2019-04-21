@@ -12,7 +12,7 @@ public class Database {
     private boolean mask = false;
     private char[] maskedPassword = null;
 
-    private static boolean debugBuild = false;
+    private static boolean debugBuild = true;
 
     public boolean connectDB(String u, String p) {
         try {
